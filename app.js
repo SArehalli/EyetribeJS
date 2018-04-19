@@ -9,6 +9,7 @@ var recording = false;
 
 const server = http.createServer((req, res) => {
         // Handle Requests
+        res.setHeader('Access-Control-Allow-Origin', '*');
         if (req.method === 'GET' && req.url === '/record') {
                 // Start recording responses
                 // Return: Timestamp of start of recording
@@ -27,6 +28,12 @@ const server = http.createServer((req, res) => {
                 res.setHeader('content-type', 'text/JSON');
                 res.end(JSON.stringify(results));
 
+        } else if (req.method === 'GET' && req.url === '/eyepos') {
+                // Respond with most recent recorded eye data
+
+                res.statusCode = 200;
+                res.setHeader('content-type', "text/JSON");
+                res.end(JSON.stringify(results[results.length - 1]));
         } else {
                 res.statusCode = 404;
                 res.setHeader('Content-Type', 'text/plain');
@@ -57,9 +64,7 @@ eyeConn.on('data', (data) => {
         for (var i = 0; i < entries.length - 1; i++) {
                 entry = JSON.parse(entries[i]);
                 if (entry["category"] === "tracker") {
-                        console.log(entry);
                         if ((entry["values"] != undefined) && recording) {
-                                console.log("writing")
                                 results.push(entry["values"]["frame"]);
                         }
                 }
